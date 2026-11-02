@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "分镜视频制作助手",
+  "description": "导入 Video Studio 项目 JSON，按镜头复制提示词、下载或复制关键帧组图和关键帧。",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "分镜视频制作助手",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "downloads",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

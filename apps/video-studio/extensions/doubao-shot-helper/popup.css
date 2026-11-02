@@ -1,0 +1,93 @@
+:root {
+  --bg: #f4f1ea;
+  --panel: #fffdf8;
+  --text: #1f2428;
+  --muted: #6d746f;
+  --line: #d8d0c2;
+  --brand: #0f766e;
+  --brand-dark: #115e59;
+  --accent: #b45309;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  width: 420px;
+  min-height: 560px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+}
+button, select, textarea { font: inherit; }
+.shell { padding: 12px; }
+.topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+h1 { margin: 0; font-size: 17px; line-height: 1.2; letter-spacing: 0; }
+p { margin: 0; }
+#summary { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.import-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  height: 32px; min-width: 64px; border-radius: 7px; background: var(--brand);
+  color: white; font-weight: 700; font-size: 12px; cursor: pointer;
+}
+.import-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.empty {
+  min-height: 420px; display: grid; place-items: center; gap: 12px; text-align: center;
+  padding: 36px; border: 1px dashed var(--line); border-radius: 8px;
+  background: rgba(255,255,255,.45); color: var(--muted); font-size: 13px;
+}
+.empty-mark {
+  width: 78px; height: 78px; display: grid; place-items: center;
+  border: 2px solid var(--brand); color: var(--brand); font-weight: 900;
+  border-radius: 8px; background: var(--panel);
+}
+.hidden { display: none; }
+.workspace { display: grid; gap: 10px; }
+.selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+label span { display: block; margin-bottom: 4px; color: var(--muted); font-size: 11px; font-weight: 700; }
+select {
+  width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 7px;
+  background: var(--panel); color: var(--text); padding: 0 8px; outline: none;
+}
+.shot-card { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); overflow: hidden; }
+.shot-head { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--line); }
+h2 { margin: 0; font-size: 15px; }
+#shotMeta { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.badge {
+  min-width: 38px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; background: #e7f4f1; color: var(--brand-dark); font-size: 11px; font-weight: 800;
+}
+.preview-grid { padding: 10px; display: grid; gap: 8px; }
+.preview {
+  position: relative; border: 1px solid var(--line); background: #eee7dc; background-size: cover;
+  background-position: center; overflow: hidden; cursor: pointer;
+}
+.sheet { width: 100%; aspect-ratio: 16/9; border-radius: 7px; }
+.preview span {
+  position: absolute; left: 6px; bottom: 6px; border-radius: 5px; padding: 2px 5px;
+  background: rgba(0,0,0,.64); color: white; font-size: 10px; font-weight: 700;
+}
+.frames { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.frame { aspect-ratio: 16/9; border-radius: 6px; }
+textarea {
+  width: calc(100% - 20px); height: 138px; margin: 0 10px 10px; resize: none;
+  border: 1px solid var(--line); border-radius: 7px; background: #fffaf1; color: var(--text);
+  padding: 8px; font-size: 12px; line-height: 1.55; outline: none;
+}
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button {
+  height: 34px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel);
+  color: var(--text); font-size: 12px; font-weight: 800; cursor: pointer;
+}
+button:hover { border-color: var(--brand); color: var(--brand-dark); }
+button.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+button.primary:hover { background: var(--brand-dark); color: #fff; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.url-panel { border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.55); overflow: hidden; }
+.panel-title { padding: 7px 9px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; font-weight: 800; }
+pre {
+  max-height: 86px; margin: 0; padding: 8px; overflow: auto; white-space: pre-wrap;
+  word-break: break-all; font-size: 10px; line-height: 1.45; color: #3d4540;
+}
+.status {
+  margin-top: 10px; min-height: 26px; display: flex; align-items: center;
+  border-top: 1px solid var(--line); padding-top: 8px; color: var(--muted); font-size: 11px;
+}

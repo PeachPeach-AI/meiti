@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>分镜视频制作助手</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>分镜视频制作助手</h1>
+        <p id="summary">导入项目 JSON 后选择镜头</p>
+      </div>
+      <label class="import-btn">
+        导入
+        <input id="fileInput" type="file" accept="application/json,.json" />
+      </label>
+    </header>
+
+    <section id="emptyState" class="empty">
+      <div class="empty-mark">JSON</div>
+      <p>支持主站导出的 <strong>video-studio-projects.json</strong> 或单个项目 JSON。</p>
+    </section>
+
+    <section id="workspace" class="workspace hidden">
+      <div class="selectors">
+        <label>
+          <span>项目</span>
+          <select id="projectSelect"></select>
+        </label>
+        <label>
+          <span>镜头</span>
+          <select id="shotSelect"></select>
+        </label>
+      </div>
+
+      <article class="shot-card">
+        <div class="shot-head">
+          <div>
+            <h2 id="shotTitle">镜头</h2>
+            <p id="shotMeta"></p>
+          </div>
+          <span id="frameCount" class="badge">0/4</span>
+        </div>
+
+        <div class="preview-grid">
+          <button id="sheetPreview" class="sheet preview" title="复制关键帧组图到剪贴板">
+            <span>关键帧组图</span>
+          </button>
+          <div id="framesPreview" class="frames"></div>
+        </div>
+
+        <textarea id="promptText" readonly></textarea>
+      </article>
+
+      <section class="actions">
+        <button id="copyPrompt" class="primary">复制提示词</button>
+        <button id="downloadAll">下载本镜头图片</button>
+        <button id="copySheet">复制关键帧组图</button>
+        <button id="copyFrame0">复制首帧图</button>
+      </section>
+
+      <section class="url-panel">
+        <div class="panel-title">图片地址</div>
+        <pre id="urlList"></pre>
+      </section>
+    </section>
+
+    <footer id="status" class="status">等待导入</footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

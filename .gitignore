@@ -1,0 +1,63 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# next / build
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# 例外：Easel 前端已构建产物随仓库提供，免去首次构建
+!apps/easel/web/frontend/dist/
+!apps/easel/web/frontend/dist/**
+
+# runtime data（只忽略运行产物，不误伤源码里的同名目录）
+/runtime/
+/apps/easel/data/
+/apps/easel/outputs/
+/apps/easel/models/
+/apps/easel/profiles/*/
+!/apps/easel/profiles/_template/
+/apps/smartstore/intercept-data/
+/apps/smartstore/intel-data/
+/apps/video-studio/data/
+/vendor/MediaCrawler/browser_data/
+/vendor/MediaCrawler/data/
+*.log
+*.jsonl
+*.sqlite
+*.sqlite-*
+*.db
+
+# secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+.secret_key
+auth_tokens.json
+cookies.json
+cms_accounts.json
+
+# local / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.zip
+*.7z
+*.rar

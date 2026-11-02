@@ -1,0 +1,24 @@
+services:
+  smartstore:
+    build: .
+    image: smartstore-web:latest
+    container_name: smartstore-web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"   # 自媒体工作站 UI + API
+      - "7866:7866"   # Easel AI 创作
+      - "7867:7867"   # 图像工作台
+      - "7868:7868"   # 视频工作台
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      SS_MODE: prod
+      SS_HEADLESS: "1"
+      SS_ENGINE: playwright
+    volumes:
+      - ./runtime:/app/runtime
+      - smartstore-openclaw:/root/.openclaw-easel
+
+volumes:
+  smartstore-openclaw:

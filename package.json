@@ -1,0 +1,18 @@
+{
+  "name": "smartstore-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 智慧门店 / 自媒体工作站 · 本地浏览器版（无 Electron）",
+  "engines": {
+    "node": ">=24.16.0 <25 || >=26.1.0"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "start": "node scripts/launch.mjs",
+    "start:portal": "node apps/smartstore/server/portal.mjs",
+    "init:easel": "node scripts/init-easel.mjs"
+  },
+  "dependencies": {
+    "openclaw": "2026.9.6"
+  }
+}
