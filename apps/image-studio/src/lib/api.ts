@@ -1,4 +1,4 @@
-﻿import type { GenerationTask, Model, HistoryItem } from '@/types'
+﻿import { normalizeImageSize, type GenerationTask, type Model, type HistoryItem } from '@/types'
 
 let taskCounter = 0
 
@@ -396,7 +396,8 @@ export async function generateImage(
   const body: Record<string, unknown> = {
     model: task.model,
     prompt: task.prompt,
-    size: task.size,
+    // Seedream 要求面积 >= 921600；历史/自定义里的小尺寸在这里统一兜底放大。
+    size: isArk ? normalizeImageSize(task.size) : task.size,
     response_format: isArk ? 'url' : 'b64_json',
   }
 

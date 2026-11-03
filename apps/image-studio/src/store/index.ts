@@ -1,7 +1,7 @@
 ﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CreationMode, Quality, ImageSize, Model, GenerationTask, HistoryItem, HistoryFilter, TaskStatus } from '@/types'
-import { SIZE_OPTIONS, IMAGE_MODELS, TEXT_MODELS, DEFAULT_API_BASE } from '@/types'
+import { SIZE_OPTIONS, IMAGE_MODELS, TEXT_MODELS, DEFAULT_API_BASE, normalizeImageSize } from '@/types'
 
 export interface AppState {
   // Settings
@@ -250,11 +250,11 @@ export const useAppStore = create<AppState>()(
       getSizeString: () => {
         const s = get()
         if (s.selectedSize.preset === 'custom') {
-          return `${s.customWidth}x${s.customHeight}`
+          return normalizeImageSize(`${s.customWidth}x${s.customHeight}`)
         }
         if (s.selectedSize.preset === 'auto') return 'auto'
         const opt = SIZE_OPTIONS.find((o) => o.preset === s.selectedSize.preset)
-        return opt ? `${opt.w}x${opt.h}` : '1024x1024'
+        return normalizeImageSize(opt ? `${opt.w}x${opt.h}` : '1024x1024')
       },
     }),
     {

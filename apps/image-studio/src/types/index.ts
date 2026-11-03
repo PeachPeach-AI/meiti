@@ -68,8 +68,28 @@ export const MODE_LABELS: Record<CreationMode, string> = {
   document: '文档生图',
 }
 
+/** 火山方舟 Seedream 系列要求图片面积至少 921600 像素（如 1280×720）。 */
+export const ARK_MIN_IMAGE_AREA = 921600
+
+/** 把过小的尺寸按比例放大到模型允许的最小面积，避免上游 400 InvalidParameter。 */
+export function normalizeImageSize(size: string): string {
+  const m = /^(\d+)\s*[x×]\s*(\d+)$/i.exec(String(size || '').trim())
+  if (!m) return size
+  const ow = Number(m[1])
+  const oh = Number(m[2])
+  if (!ow || !oh) return size
+  if (ow * oh >= ARK_MIN_IMAGE_AREA) return `${ow}x${oh}`
+  const scale = Math.sqrt(ARK_MIN_IMAGE_AREA / (ow * oh))
+  const round16 = (n: number) => Math.max(16, Math.ceil((n * scale) / 16) * 16)
+  let w = round16(ow)
+  let h = round16(oh)
+  while (w * h < ARK_MIN_IMAGE_AREA) { w += 16; h += 16 }
+  return `${w}x${h}`
+}
+
 export const SIZE_OPTIONS: { preset: ImageSizePreset; label: string; desc: string; w: number; h: number }[] = [
-  { preset: '900x383', label: '900 × 383', desc: '2.35:1 · 公众号封面', w: 900, h: 383 },
+  // 2.35:1 公众号封面；900×383 只有 34 万像素，会被 Seedream 拒绝，这里用满足最小面积的 1600×680。
+  { preset: '900x383', label: '1600 × 680', desc: '2.35:1 · 公众号封面', w: 1600, h: 680 },
   { preset: '1024x1024', label: '1024 × 1024', desc: '1:1 · 1K 方图（默认）', w: 1024, h: 1024 },
   { preset: '1024x1536', label: '1024 × 1536', desc: '2:3 · 常用竖图', w: 1024, h: 1536 },
   { preset: '1080x1440', label: '1080 × 1440', desc: '3:4 · 口播封面', w: 1080, h: 1440 },
@@ -83,7 +103,7 @@ export const SIZE_OPTIONS: { preset: ImageSizePreset; label: string; desc: strin
   { preset: '2816x1984', label: '2816 × 1984', desc: 'A3 · 横版', w: 2816, h: 1984 },
   { preset: '2160x3840', label: '2160 × 3840', desc: '9:16 · 4K 竖图', w: 2160, h: 3840 },
   { preset: '3840x2160', label: '3840 × 2160', desc: '16:9 · 4K 横图', w: 3840, h: 2160 },
-  { preset: 'custom', label: '自定义尺寸', desc: '16 的倍数', w: 0, h: 0 },
+  { preset: 'custom', label: '自定义尺寸', desc: '16 的倍数 · 面积 ≥ 921600', w: 0, h: 0 },
 ]
 
 
