@@ -33,6 +33,13 @@ import random
 import re
 import sys
 import time
+
+# Windows 默认控制台是 GBK；二维码就绪后会打印 emoji，编码失败会把进程杀掉。
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -495,7 +502,10 @@ def cmd_login(a) -> int:
     login_state.write_status(sf, "starting")
 
     with sync_playwright() as p:
-        ctx = _launch(p, headed=a.headed, base=a.profile_base, proxy=_proxy(a.proxy, a.no_proxy))
+        # 小红书对 headless 内核也会返回 300012「IP存在风险」；Windows 桌面默认改用有头浏览器，
+        # 让真实窗口完成扫码。无桌面的 NAS/Linux 仍走 headless（可设 EASEL_XHS_HEADED=0 强制关闭）。
+        headed = a.headed or (os.name == "nt" and os.environ.get("EASEL_XHS_HEADED", "1") != "0")
+        ctx = _launch(p, headed=headed, base=a.profile_base, proxy=_proxy(a.proxy, a.no_proxy))
         page = ctx.pages[0] if ctx.pages else ctx.new_page()
         try:
             page.goto(EXPLORE_URL, wait_until="domcontentloaded")
