@@ -1279,6 +1279,56 @@ async def api_push(payload: dict = Body(...)):
     return {"ok": all(x.get("ok") for x in results.values()), "results": results}
 
 
+# ---- 官网 Maywide（Next.js 后台）账号：凭证式登录 ----
+_MAYWIDE_PLATFORM = "maywide"
+if _MAYWIDE_PLATFORM not in getattr(legacy, "LOGIN_RUNNERS", {}):
+    legacy.LOGIN_RUNNERS[_MAYWIDE_PLATFORM] = {
+        "name": "官网 Maywide",
+        "backend": "cms",
+        "note": "官网后台（Next.js）",
+    }
+
+_orig_cms_verify = getattr(legacy, "_cms_verify", None)
+
+
+def _maywide_verify(platform, acc):
+    if platform != _MAYWIDE_PLATFORM:
+        return _orig_cms_verify(platform, acc) if _orig_cms_verify else (False, "未配置校验器")
+    site = str(acc.get("siteUrl") or "").strip().rstrip("/")
+    user = str(acc.get("username") or "").strip()
+    secret = str(acc.get("secret") or "")
+    if not site.startswith(("http://", "https://")):
+        site = "http://" + site
+    if site.endswith("/admin"):
+        site = site[:-6].rstrip("/")
+    if not (site and user and secret):
+        return False, "站点地址 / 用户名 / 密码都要填"
+    try:
+        body = json.dumps({"username": user, "password": secret}).encode("utf-8")
+        req = urllib.request.Request(
+            site + "/api/admin/login",
+            data=body,
+            method="POST",
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=20) as r:
+            raw = r.read().decode("utf-8", "replace")
+            status = r.status
+        data = json.loads(raw) if raw else {}
+        if status == 200 and data.get("ok", True):
+            return True, "验证通过：" + user
+        return False, str(data.get("message") or "登录失败")
+    except Exception as exc:
+        return False, "登录请求失败：" + type(exc).__name__
+
+
+if _orig_cms_verify:
+    legacy._cms_verify = _maywide_verify
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("EASEL_WEB_PORT", "7866")))

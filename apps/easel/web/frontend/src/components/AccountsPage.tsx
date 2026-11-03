@@ -573,7 +573,9 @@ export default function AccountsPage() {
                 <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginBottom: 14, lineHeight: 1.6 }}>
                   {cred.platform === 'wordpress'
                     ? 'WordPress：站点地址 + 用户名 + 应用密码（用户 → 个人资料 → 应用程序密码）。'
-                    : 'Typecho：站点地址 + 用户名 + 密码（需在后台启用 XML-RPC）。'}
+                    : cred.platform === 'maywide'
+                      ? '官网 Maywide：站点地址 + 后台账号 + 密码（默认后台 /admin）。'
+                      : 'Typecho：站点地址 + 用户名 + 密码（需在后台启用 XML-RPC）。'}
                 </div>
                 {credMsg && <div style={{ fontSize: 12.5, color: 'var(--green)', marginBottom: 10 }}>{credMsg}</div>}
                 <label style={{ fontSize: 12, color: 'var(--text-secondary)' }}>站点地址</label>
