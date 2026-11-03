@@ -231,6 +231,8 @@ PLATFORMS: dict[str, dict] = {
         "publish_url": "https://zhuanlan.zhihu.com/write",
         "profile": "ZhihuProfile",
         "login_check": ".AppHeader-profile, .AppHeader-userInfo",
+        # 知乎二维码是 138×138 的 canvas（.Qrcode-qrcode），优先截本体，别退回整页导致码太小
+        "login_qr_selector": "canvas.Qrcode-qrcode, .Qrcode-qrcode, .Qrcode-img canvas, .Qrcode-img",
         "logged_out_selector": ".SignContainer, .Login-content, button:has-text('登录')",
         "me_name_selector": ".AppHeader-profile .name, .ProfileHeader-name, .AppHeader-userInfo .name",
         "me_avatar_selector": ".AppHeader-profile img[src], .Avatar[src]",
@@ -1078,8 +1080,8 @@ def _score_qr_el(el) -> float | None:
     if not b:
         return None
     w, h = b["width"], b["height"]
-    # 尺寸：收紧到 140~600（原 120~520 太松，logo/广告/头像会误命中）
-    if w < 140 or h < 140 or w > 600 or h > 600:
+    # 尺寸：100~600。知乎二维码 canvas 只有 138×138，阈值 140 会把它漏掉退回整页截图。
+    if w < 100 or h < 100 or w > 600 or h > 600:
         return None
     ratio = w / h if h else 0
     if not (0.75 <= ratio <= 1.34):   # 二维码接近正方形，排除横幅/文字条
@@ -1097,6 +1099,20 @@ def _score_qr_el(el) -> float | None:
     except Exception:
         pass
     return score
+
+
+def _upscale_qr(path, min_side: int = 260) -> None:
+    """二维码原图很小时（知乎 canvas 138×138）放大 2 倍，避免前端展示太小扫不出来。
+    用 NEAREST 保持黑白模块边缘，不引入插值模糊。"""
+    try:
+        from PIL import Image
+        im = Image.open(path)
+        if min(im.size) >= min_side:
+            return
+        scale = max(1, (min_side + min(im.size) - 1) // min(im.size))
+        im.resize((im.width * scale, im.height * scale), Image.NEAREST).save(path)
+    except Exception:
+        pass
 
 
 def _crop_qr(page, qr_out, cfg) -> None:
@@ -1123,6 +1139,7 @@ def _crop_qr(page, qr_out, cfg) -> None:
     if best is not None:
         try:
             best[1].screenshot(path=str(qr_out))
+            _upscale_qr(qr_out)
             return
         except Exception:
             pass
@@ -1152,6 +1169,7 @@ def _capture_qr(page, qr_out, cfg) -> None:
             el = page.query_selector(ifr)
             if el:
                 el.screenshot(path=str(qr_out))
+                _upscale_qr(qr_out)
                 return
         except Exception:
             pass  # iframe 路径任何异常都退回主页面裁剪
