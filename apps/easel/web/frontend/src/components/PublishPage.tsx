@@ -27,11 +27,12 @@ const PLATFORMS: { key: string; label: string; titleLimit?: number; bodyLimit: n
   { key: 'wechat-oa', label: '公众号', titleLimit: 64, bodyLimit: 20000, hint: '图文文章，正文用 Markdown，首图作封面，发到草稿箱；需先在账号页「登录公众号后台」扫码' },
   { key: 'wordpress', label: 'WordPress', bodyLimit: 50000, hint: '自建站，正文 Markdown/HTML；账号页填站点地址 + 用户名 + 应用密码' },
   { key: 'typecho', label: 'Typecho', bodyLimit: 50000, hint: '自建站，正文 Markdown/HTML；账号页填站点地址 + 用户名 + 密码' },
+  { key: 'maywide', label: '官网·资源', titleLimit: 70, bodyLimit: 50000, hint: '发布到官网资源库；标签里写「行业报告 / 白皮书 / 指南 / 方案」可指定资料类型' },
 ];
 const LABEL2KEY = Object.fromEntries(PLATFORMS.map((p) => [p.label, p.key]));
 
 // 能一键发布的平台（有后端 publisher）
-const PUBLISHABLE = new Set(['xiaohongshu', 'douyin', 'kuaishou', 'weixin-channels', 'zhihu', 'weibo', 'toutiao', 'baijiahao', 'sohu', 'bilibili', 'wechat-oa', 'wordpress', 'typecho']);
+const PUBLISHABLE = new Set(['xiaohongshu', 'douyin', 'kuaishou', 'weixin-channels', 'zhihu', 'weibo', 'toutiao', 'baijiahao', 'sohu', 'bilibili', 'wechat-oa', 'wordpress', 'typecho', 'maywide']);
 // 必须附带媒体的平台（无媒体发不了）——公众号需要一张封面图，也计入
 const MEDIA_REQUIRED = new Set(['xiaohongshu', 'douyin', 'kuaishou', 'weixin-channels', 'bilibili', 'wechat-oa']);
 // 只能发视频的平台（抖音/视频号/B站：图文不走此链路，必须视频）

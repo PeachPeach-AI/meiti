@@ -104,6 +104,14 @@ runtime/            # 运行日志、采集产物（已 gitignore）
 
 MediaCrawler 在 Windows 上默认走 CDP，可以弹出真实 Chrome/Edge 扫码。NAS 没有桌面，`SS_HEADLESS=1` 时走 Playwright 无头模式，二维码会打印在任务日志里。若平台要求人工过滑块，建议在 Windows 机器上完成登录后，把浏览器 profile 目录复制到 NAS 的对应位置，或改用有桌面的机器运行采集。
 
+## 官网资源发布
+
+- 账号页 → 「官网 Maywide」→ 配置站点地址、后台账号、密码，保存并验证。
+- 发布中心 → 勾选「官网·资源」→ 发布。
+- 标签里写 `行业报告` / `白皮书` / `指南` / `方案` 可指定资料类型，默认 `行业报告`。
+- 正文支持 Markdown/HTML；发布时第一张图片会自动上传并作为封面。
+- 发布成功后返回资源页地址，例如 `http://wwws.maywide.com/resources/resource-...`。
+
 ## 未包含的大文件
 
 为了仓库可上传，以下内容没有放进 Git，运行时会自动创建或按需下载：

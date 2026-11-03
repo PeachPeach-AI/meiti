@@ -1329,6 +1329,130 @@ if _orig_cms_verify:
     legacy._cms_verify = _maywide_verify
 
 
+# ---- 官网资源发布（Next.js 后台 /admin/content/resource）----
+_IMAGE_EXTS = getattr(legacy, "IMAGE_EXTS", {".png", ".jpg", ".jpeg", ".webp", ".gif"})
+
+
+def _maywide_md_to_html(text: str) -> str:
+    t = str(text or "").strip()
+    if not t:
+        return ""
+    if re.search(r"<(p|h[1-6]|ul|ol|div|img|br)\b", t, re.I):
+        return t
+    t = html.escape(t, quote=False)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"\*(.+?)\*", r"<em>\1</em>", t)
+    t = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", r'<img src="\2" alt="\1" />', t)
+    t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', t)
+    blocks = []
+    for block in re.split(r"\n\s*\n", t):
+        block = block.strip()
+        if not block:
+            continue
+        if block.startswith("### "):
+            blocks.append("<h3>" + block[4:] + "</h3>")
+        elif block.startswith("## "):
+            blocks.append("<h2>" + block[3:] + "</h2>")
+        elif block.startswith("# "):
+            blocks.append("<h1>" + block[2:] + "</h1>")
+        elif all(line.strip().startswith(("- ", "* ")) for line in block.splitlines()):
+            items = "".join("<li>" + line.strip()[2:] + "</li>" for line in block.splitlines())
+            blocks.append("<ul>" + items + "</ul>")
+        else:
+            blocks.append("<p>" + block.replace("\n", "<br />") + "</p>")
+    return "\n".join(blocks)
+
+
+def _maywide_publish_sync(title: str, body: str, media, tags: str) -> str:
+    import requests
+
+    cfg = legacy._cms_get("maywide")
+    if not legacy._cms_has("maywide"):
+        raise RuntimeError("请先在账号页配置官网 Maywide 账号")
+    site = str(cfg.get("siteUrl") or "").strip().rstrip("/")
+    if not site.startswith(("http://", "https://")):
+        site = "http://" + site
+    if site.endswith("/admin"):
+        site = site[:-6].rstrip("/")
+
+    ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    s = requests.Session()
+    s.headers.update({"User-Agent": ua})
+    r = s.post(site + "/api/admin/login", json={
+        "username": cfg.get("username", ""), "password": cfg.get("secret", ""),
+    }, timeout=20)
+    if r.status_code != 200 or not (r.json() or {}).get("ok"):
+        raise RuntimeError("官网后台登录失败")
+
+    cover_url = ""
+    for rel in (media or []):
+        try:
+            full = legacy._safe_output_path(rel)
+        except Exception:
+            continue
+        if getattr(full, "suffix", "").lower() not in _IMAGE_EXTS or not full.is_file():
+            continue
+        ext = full.suffix.lower()
+        ctype = {".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}.get(ext, "image/jpeg")
+        with open(full, "rb") as fh:
+            up = s.post(site + "/api/admin/media", files={"file": (full.name, fh, ctype)}, timeout=60)
+        if up.status_code == 200:
+            cover_url = str((up.json() or {}).get("url") or "")
+            if cover_url:
+                break
+
+    html_body = _maywide_md_to_html(body) or ("<p>" + html.escape(title) + "</p>")
+    plain = re.sub(r"<[^>]+>", "", html_body)
+    plain = re.sub(r"\s+", " ", html.unescape(plain)).strip()
+    summary = plain[:120] or title[:120]
+    known_types = ["行业报告", "白皮书", "指南", "方案", "资料"]
+    resource_type = next((k for k in known_types if k in str(tags or "")), "行业报告")
+    slug = "resource-" + time.strftime("%Y%m%d%H%M%S")
+    record = {
+        "status": "draft",
+        "seoTitle": title[:70],
+        "seoDescription": summary[:200],
+        "shareImage": cover_url,
+        "canonicalPath": "/resources/" + slug,
+        "slug": slug,
+        "resourceType": resource_type,
+        "title": title,
+        "summary": summary,
+        "cover": cover_url,
+        "publishedAt": time.strftime("%Y-%m-%d"),
+        "topic": "",
+        "body": html_body,
+        "sort": 0,
+    }
+    cr = s.post(site + "/api/admin/content/resource", json=record, timeout=30)
+    if cr.status_code != 200:
+        raise RuntimeError("创建资源失败：" + (cr.text or "")[:200])
+    rid = (cr.json() or {}).get("id")
+    if not rid:
+        raise RuntimeError("创建资源成功但未返回 id")
+    pub = s.post(site + "/api/admin/content/resource/" + str(rid) + "?action=publish", timeout=30)
+    if pub.status_code != 200:
+        raise RuntimeError("资源已创建为草稿，但发布失败（id=" + str(rid) + "）")
+    return site + "/resources/" + slug
+
+
+@app.post("/api/maywide/publish")
+async def _api_maywide_publish(request: Request):
+    _uid()
+    payload = await request.json()
+    title = str((payload or {}).get("title") or "").strip()
+    body = str((payload or {}).get("body") or "")
+    media = list((payload or {}).get("media") or [])
+    tags = str((payload or {}).get("tags") or "")
+    if not title and not body.strip():
+        raise HTTPException(400, "标题/正文不能为空")
+    try:
+        url = await asyncio.to_thread(_maywide_publish_sync, title, body, media, tags)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(500, f"官网发布失败：{exc}")
+    return {"ok": True, "message": "已发布到官网资源", "detail": url}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("EASEL_WEB_PORT", "7866")))

@@ -724,7 +724,10 @@ export function publishNow(
   platform: string,
   payload: { title: string; body: string; media: string[]; tags?: string },
 ): Promise<PublishResult> {
-  return request<PublishResult>(`/api/publish/${encodeURIComponent(platform)}`, {
+  const url = platform === 'maywide'
+    ? '/api/maywide/publish'
+    : `/api/publish/${encodeURIComponent(platform)}`;
+  return request<PublishResult>(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
