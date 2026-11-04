@@ -3,6 +3,20 @@
 > 脚本：`skills/openclaw/skill-free-image-finder/scripts/fetch_images.py`，CWD=项目根。
 > 纯标准库实现，无第三方依赖；有 PIL 时会做最小宽度校验（建议装 Pillow）。
 
+## 搜中国素材（国内用户的推荐姿势）
+
+国际图库里有大量**真实拍摄**的中国场景照片（故宫/春节/火锅/茶馆/城市夜景/新能源车等），
+免费可商用、无水印——这正是国内设计站收费才能拿的东西。两个诀窍：
+
+1. **关键词用英文**命中率最高，主题词 + 地点词组合：
+   ```
+   beijing forbidden city   great wall of china     chinese new year lantern
+   hotpot china             chinatown night         chinese tea ceremony
+   hong kong street         guilin mountains        chinese food restaurant
+   ```
+2. 中文关键词也能搜（Pixabay 对中文支持更好），效果差时换英文；「auto」模式下
+   Pexels 质量优先，想试中文先加 `--source pixabay`。
+
 ## 配 Key（可选，二选一即可用）
 
 ```powershell
